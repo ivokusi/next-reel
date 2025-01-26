@@ -6,10 +6,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { SignOutButton, useUser } from "@clerk/nextjs";
-import { Home, LogOut, Plus, Send, Settings, User } from "lucide-react";
+import { Home, LogOut, Plus, Send, User } from "lucide-react";
 import Link from "next/link";
-
-const size = "30px";
 
 export default function Navigation() {
 
