@@ -96,6 +96,7 @@ export default function ProfilePage() {
                         <Plus className="size-5" />
                     </div>
                 </div>
+                <VideoCard />
             </div>
         </div>
 
