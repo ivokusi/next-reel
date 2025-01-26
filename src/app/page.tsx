@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 const titleClassName = "text-[128px] font-bold italic p-0 m-0";
 const spanClassName = "font-bold italic";
 
@@ -18,7 +20,7 @@ export default function Home() {
 				<h1 className={`${titleClassName} ${cyan} ${cyanEffect}`}>Next</h1>
 				<h1 className={`${titleClassName} ${magenta} ${magentaEffect}`}>Reel</h1>
 			</div>
-			<p className="text-lg text-white"><span className={`${spanClassName} ${cyanEffect} ${cyan}`}><a href="/sign-in">Sign In</a></span> or <span className={`${spanClassName} ${magentaEffect} ${magenta}`}><a href="/sign-up">Sign Up</a></span> to get started</p>
+			<p className="text-lg text-white"><span className={`${spanClassName} ${cyanEffect} ${cyan}`}><Link href="/sign-in">Sign In</Link></span> or <span className={`${spanClassName} ${magentaEffect} ${magenta}`}><Link href="/sign-up">Sign Up</Link></span> to get started</p>
 		</div>
 
 	)

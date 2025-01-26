@@ -95,8 +95,8 @@ export default function ProfilePage() {
                     <div className={`flex items-center justify-center ${videoAspectRatio} bg-gray-800 rounded-lg border border-white`}>
                         <Plus className="size-5" />
                     </div>
+                    <VideoCard />
                 </div>
-                <VideoCard />
             </div>
         </div>
 

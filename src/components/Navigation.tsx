@@ -17,23 +17,25 @@ export default function Navigation() {
 
     return (
 
-        <div className="w-screen h-[65px] flex flex-col items-center justify-between">
-            <div className="w-[99%] h-full flex items-center justify-between px-4">
+        <div className="w-full h-[65px] flex-none">
+            <div className="w-[99%] mx-auto h-full flex items-center justify-between px-4">
                 <Link href="/feed">
-                    <Home className="hover:text-[#4de8f4]" />
+                    <Home className="hover:text-[#fd3e3e]" />
                 </Link>
-                <Input type="text" placeholder="Search..." className={`h-[${size}] w-[350px]`} />
+                <Input type="text" placeholder="Search..." className="h-[30px] w-[350px]" />
                 <div className="flex items-center justify-center gap-4">
-                    <Button variant="magenta_outline" className={`h-[${size}]`} >
-                        <Plus />
-                        CREATE
+                    <Button variant="magenta_outline" className="h-[30px]" >
+                        <div className="flex items-center justify-center gap-2">
+                            <Plus />
+                            CREATE
+                        </div>
                     </Button>
-                    <Button variant="cyan" className={`h-[${size}]`}>
+                    <Button variant="cyan_outline" className="h-[30px]">
                         <Send />
                     </Button>
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Avatar className={`h-[${size}] w-[${size}]`}>
+                            <Avatar className="h-[30px] w-[30px]">
                                 <AvatarImage src={user?.imageUrl} />
                                 <AvatarFallback>{user?.firstName?.charAt(0)}</AvatarFallback>
                             </Avatar>
