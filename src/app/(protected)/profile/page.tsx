@@ -24,13 +24,11 @@ function Icon({ icon, count }: IconProps) {
     )
 }
 
-function VideoCard({ video }: { video: any }) {
-
-    console.log(video);
+function VideoCard({ video }: { video: string }) {
 
     return (
         <div className="relative">
-            <video src={video.videoUrl} className={`${videoAspectRatio} rounded-lg`} autoPlay loop muted />
+            <video src={video} className={`${videoAspectRatio} rounded-lg`} autoPlay loop muted />
             <div className={`${videoAspectRatio} absolute inset-0 hover:bg-black/60 rounded-lg flex flex-col items-center justify-center group`}>
                 <div className="w-full h-full flex flex-col items-center justify-center gap-4">
                     <div className="flex items-center justify-center gap-4">
@@ -109,7 +107,7 @@ export default function ProfilePage() {
                         </div>
                     </Link>
                     {videos?.map((video) => (
-                        <VideoCard key={video._id} video={video} />
+                        <VideoCard key={video._id} video={video.videoUrl} />
                     ))}
                 </div>
             </div>
