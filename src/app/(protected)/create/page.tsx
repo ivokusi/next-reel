@@ -20,7 +20,7 @@ export default function CreatePage() {
     const [preview, setPreview] = useState<string | null>(null);
     const [hashtags, setHashtags] = useState<string[]>([]);
     const [caption, setCaption] = useState<string>('');
-    const [blob, setBlob] = useState<PutBlobResult | null>(null);
+    const [_, setBlob] = useState<PutBlobResult | null>(null);
     const { user } = useUser();
 
     function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
