@@ -20,7 +20,7 @@ export default function CreatePage() {
     const [preview, setPreview] = useState<string | null>(null);
     const [hashtags, setHashtags] = useState<string[]>([]);
     const [caption, setCaption] = useState<string>('');
-    const [_, setBlob] = useState<PutBlobResult | null>(null);
+    const [blob, setBlob] = useState<PutBlobResult | null>(null);
     const { user } = useUser();
 
     function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
@@ -79,6 +79,8 @@ export default function CreatePage() {
     async function handleSubmit(event: React.MouseEvent<HTMLButtonElement>) {
         
         event.preventDefault();
+
+        console.log(blob);
 
         if (!inputFileRef.current?.files?.[0]) return;
 
