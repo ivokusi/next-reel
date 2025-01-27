@@ -27,15 +27,19 @@ export async function POST(request: Request): Promise<NextResponse> {
 
         try {
 
-          if (!tokenPayload) throw new Error('No token payload');
-          
-          const payload = JSON.parse(tokenPayload);
-          await convex.mutation(api.functions.videos.createVideo, {
-            userId: payload.userId,
-            hashtags: payload.hashtags,
-            caption: payload.caption,
-            videoUrl: blob.url
-          });
+			console.log(tokenPayload);
+			console.log(blob);
+
+			if (!tokenPayload) throw new Error('No token payload');
+			
+			const payload = JSON.parse(tokenPayload);
+			
+			await convex.mutation(api.functions.videos.createVideo, {
+				userId: payload.userId,
+				hashtags: payload.hashtags,
+				caption: payload.caption,
+				videoUrl: blob.url
+			});
           
         } catch (error) {
           console.error('Error during upload processing:', error);
