@@ -35,7 +35,7 @@ export async function POST(request: Request): Promise<NextResponse> {
 			const payload = JSON.parse(tokenPayload);
 			
 			await convex.mutation(api.functions.videos.createVideo, {
-				userId: payload.userId,
+				clerkId: payload.clerkId,
 				hashtags: payload.hashtags,
 				caption: payload.caption,
 				videoUrl: blob.url

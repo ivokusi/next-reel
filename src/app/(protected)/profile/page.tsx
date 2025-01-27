@@ -3,7 +3,9 @@
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { useUser } from "@clerk/nextjs";
-import { Edit, Heart, MessageCircle, Plus, Share, Trash } from "lucide-react";
+import { api } from "@convex/_generated/api";
+import { useQuery } from "convex/react";
+import { Edit, Eye, Heart, MessageCircle, Plus, Trash } from "lucide-react";
 import Link from "next/link";
 
 const videoAspectRatio = "w-[225px] h-[400px]"
@@ -22,22 +24,27 @@ function Icon({ icon, count }: IconProps) {
     )
 }
 
-function VideoCard() {
+function VideoCard({ video }: { video: any }) {
+
+    console.log(video);
 
     return (
-        <div className={`${videoAspectRatio} bg-gray-800 rounded-lg flex flex-col items-center justify-center`}>
-            <div className="w-full h-full flex flex-col items-center justify-center gap-4 group">
-                <div className="flex items-center justify-center gap-4">
+        <div className="relative">
+            <video src={video.videoUrl} className={`${videoAspectRatio} rounded-lg`} autoPlay loop muted />
+            <div className={`${videoAspectRatio} absolute inset-0 hover:bg-black/60 rounded-lg flex flex-col items-center justify-center group`}>
+                <div className="w-full h-full flex flex-col items-center justify-center gap-4">
+                    <div className="flex items-center justify-center gap-4">
                     <Icon icon={<Heart className="size-5" />} count={0} />
                     <Icon icon={<MessageCircle className="size-5" />} count={0} />
-                    <Icon icon={<Share className="size-5" />} count={0} />
+                    <Icon icon={<Eye className="size-5" />} count={0} />
                 </div>
                 <Button variant="destructive" className="w-[150px] invisible group-hover:visible">
                     <div className="flex items-center justify-center gap-2">
                         <Trash className="size-5" />
                         Delete
                     </div>
-                </Button>
+                    </Button>
+                </div>
             </div>
         </div>
     )
@@ -47,6 +54,10 @@ export default function ProfilePage() {
 
     const { user } = useUser();
 
+    const videos = useQuery(api.functions.videos.getVideosByUserId, {
+        clerkId: user?.id as string,
+    });
+
     return (
 
         <div className="w-[50%] flex flex-col items-center justify-center gap-8">
@@ -55,7 +66,7 @@ export default function ProfilePage() {
                     <AvatarImage src={user?.imageUrl} />
                 </Avatar>
                 <h1 className="text-lg font-bold text-gray-300">@{user?.username}</h1>
-                <p className="text-sm text-gray-300 text-center">I am a software engineer</p>
+                <p className="text-sm text-gray-300 text-center">I love to build stuff</p>
                 <div className="flex items-center justify-center gap-4">
                     <div className="w-[100px] flex flex-col items-center justify-center gap-2">
                         <h1 className="text-lg font-bold text-gray-300">0</h1>
@@ -92,10 +103,14 @@ export default function ProfilePage() {
             <div className="w-full h-[500px]">
                 <h1 className="text-lg font-bold text-gray-300 mb-4">My Videos</h1>
                 <div className="grid grid-cols-3 gap-10 pb-10">
-                    <div className={`flex items-center justify-center ${videoAspectRatio} bg-gray-800 rounded-lg border border-white`}>
-                        <Plus className="size-5" />
-                    </div>
-                    <VideoCard />
+                    <Link href="/create">
+                        <div className={`flex items-center justify-center ${videoAspectRatio} bg-gray-800 rounded-lg border border-white`}>
+                            <Plus className="size-5" />
+                        </div>
+                    </Link>
+                    {videos?.map((video) => (
+                        <VideoCard key={video._id} video={video} />
+                    ))}
                 </div>
             </div>
         </div>

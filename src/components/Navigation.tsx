@@ -23,10 +23,12 @@ export default function Navigation() {
                 <Input type="text" placeholder="Search..." className="h-[30px] w-[350px]" />
                 <div className="flex items-center justify-center gap-4">
                     <Button variant="magenta_outline" className="h-[30px]" >
-                        <div className="flex items-center justify-center gap-2">
-                            <Plus />
-                            CREATE
-                        </div>
+                        <Link href="/create">
+                            <div className="flex items-center justify-center gap-2">
+                                <Plus />
+                                CREATE
+                            </div>
+                        </Link>
                     </Button>
                     <Button variant="cyan_outline" className="h-[30px]">
                         <Send />

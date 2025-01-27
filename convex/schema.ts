@@ -2,13 +2,15 @@ import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
 export default defineSchema({
-  
+    
     users: defineTable({
-        name: v.string(),
-        username: v.string(),
         clerkId: v.string(),
-    }).index("by_clerkId", ["clerkId"]),
-
+        username: v.string(),
+        image: v.string(),
+    })
+    .index("by_clerkId", ["clerkId"])
+    .index("by_username", ["username"]),
+    
     videos: defineTable({
         userId: v.id("users"),
         hashtags: v.array(v.string()),
@@ -18,4 +20,4 @@ export default defineSchema({
         likes: v.number(),
     }).index("by_userId", ["userId"]),
 
-}); 
+});

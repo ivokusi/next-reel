@@ -12,11 +12,13 @@ export const current = query({
 export const upsertFromClerk = internalMutation({
     args: { data: v.any() as Validator<UserJSON> }, // no runtime validation, trust Clerk
     async handler(ctx, { data }) {
+
+        console.log(data);
         
         const userAttributes = {
-            name: `${data.first_name} ${data.last_name}`,
             username: data.username ?? "",
             clerkId: data.id,
+            image: data.image_url ?? "",
         };
 
         const user = await userByClerkId(ctx, data.id);
@@ -71,7 +73,7 @@ export async function getCurrentUser(ctx: QueryCtx) {
 
 }
 
-async function userByClerkId(ctx: QueryCtx, clerkId: string) {
+export async function userByClerkId(ctx: QueryCtx, clerkId: string) {
   return await ctx.db
     .query("users")
     .withIndex("by_clerkId", (q) => q.eq("clerkId", clerkId))

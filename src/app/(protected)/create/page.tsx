@@ -7,11 +7,15 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { useUser } from '@clerk/nextjs';
-import { type PutBlobResult } from '@vercel/blob';
+import { api } from '@convex/_generated/api';
 import { upload } from '@vercel/blob/client';
+import { ConvexHttpClient } from 'convex/browser';
 import { Forward, X } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useRef, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
+
+const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL || '');
 
 export default function CreatePage() {
   
@@ -20,8 +24,8 @@ export default function CreatePage() {
     const [preview, setPreview] = useState<string | null>(null);
     const [hashtags, setHashtags] = useState<string[]>([]);
     const [caption, setCaption] = useState<string>('');
-    const [blob, setBlob] = useState<PutBlobResult | null>(null);
     const { user } = useUser();
+    const router = useRouter();
 
     function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
         
@@ -80,8 +84,6 @@ export default function CreatePage() {
         
         event.preventDefault();
 
-        console.log(blob);
-
         if (!inputFileRef.current?.files?.[0]) return;
 
         const file = inputFileRef.current.files[0];
@@ -90,15 +92,20 @@ export default function CreatePage() {
             access: 'public',
             handleUploadUrl: '/api/create',
             clientPayload: JSON.stringify({
-                userId: user?.id,
+                clerkId: user?.id as string,
                 caption,
                 hashtags
             })
         });
 
-        console.log(newBlob);
+        await convex.mutation(api.functions.videos.createVideo, {
+            clerkId: user?.id as string,
+            caption,
+            hashtags,
+            videoUrl: newBlob.url
+        });
 
-        setBlob(newBlob);
+        router.push('/profile');
 
     }
 
@@ -159,7 +166,7 @@ export default function CreatePage() {
                                 loop
                                 onClick={handlePauseVideo}
                             />
-                            <div className="absolute inset-0 bg-gray-800/0 hover:bg-black/60 flex flex-col justify-end group " onClick={handlePauseVideo}>
+                            <div className="absolute inset-0 hover:bg-black/60 flex flex-col justify-end group " onClick={handlePauseVideo}>
                                 <div className="flex flex-col text-white p-4 invisible group-hover:visible gap-4">
                                     <p className="text-sm font-semibold ">@{user?.username}</p>
                                     <div className="flex flex-wrap">
