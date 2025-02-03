@@ -4,7 +4,8 @@ import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { useUser } from "@clerk/nextjs";
 import { api } from "@convex/_generated/api";
-import { useQuery } from "convex/react";
+import { Id } from "@convex/_generated/dataModel";
+import { useMutation, useQuery } from "convex/react";
 import { Edit, Eye, Heart, MessageCircle, Plus, Trash } from "lucide-react";
 import Link from "next/link";
 
@@ -13,6 +14,13 @@ const videoAspectRatio = "w-[225px] h-[400px]"
 type IconProps = {
     icon: React.ReactNode;
     count: number;
+}
+
+type VideoType = {
+    _id: Id<"videos">,
+    videoUrl: string,
+    views: number,
+    likes: number,
 }
 
 function Icon({ icon, count }: IconProps) {
@@ -24,19 +32,44 @@ function Icon({ icon, count }: IconProps) {
     )
 }
 
-function VideoCard({ video }: { video: string }) {
+function VideoCard({ video }: { video: VideoType }) {
+
+    const deleteVideo = useMutation(api.functions.videos.deleteVideo);
+
+    async function handleDelete() {
+        
+        try {
+
+            await fetch("/api/delete", {
+                method: "POST",
+                body: JSON.stringify({
+                    videoUrl: video.videoUrl
+                }),
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            });
+
+            await deleteVideo({ videoId: video._id });
+
+        } catch (error) {
+            console.log(error);
+
+        }
+
+    }
 
     return (
         <div className="relative">
-            <video src={video} className={`${videoAspectRatio} rounded-lg`} autoPlay loop muted />
+            <video src={video.videoUrl} className={`${videoAspectRatio} rounded-lg`} autoPlay loop muted />
             <div className={`${videoAspectRatio} absolute inset-0 hover:bg-black/60 rounded-lg flex flex-col items-center justify-center group`}>
                 <div className="w-full h-full flex flex-col items-center justify-center gap-4">
                     <div className="flex items-center justify-center gap-4">
-                    <Icon icon={<Heart className="size-5" />} count={0} />
+                    <Icon icon={<Heart className="size-5" />} count={video.likes} />
                     <Icon icon={<MessageCircle className="size-5" />} count={0} />
-                    <Icon icon={<Eye className="size-5" />} count={0} />
+                    <Icon icon={<Eye className="size-5" />} count={video.views} />
                 </div>
-                <Button variant="destructive" className="w-[150px] invisible group-hover:visible">
+                <Button variant="destructive" className="w-[150px] invisible group-hover:visible" onClick={handleDelete}>
                     <div className="flex items-center justify-center gap-2">
                         <Trash className="size-5" />
                         Delete
@@ -52,9 +85,7 @@ export default function ProfilePage() {
 
     const { user } = useUser();
 
-    const videos = useQuery(api.functions.videos.getVideosByUserId, {
-        clerkId: user?.id as string,
-    });
+    const videos = useQuery(api.functions.videos.getVideosByUserId);
 
     return (
 
@@ -107,7 +138,7 @@ export default function ProfilePage() {
                         </div>
                     </Link>
                     {videos?.map((video) => (
-                        <VideoCard key={video._id} video={video.videoUrl} />
+                        <VideoCard key={video._id} video={video} />
                     ))}
                 </div>
             </div>

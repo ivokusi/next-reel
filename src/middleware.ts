@@ -7,7 +7,7 @@ export default clerkMiddleware(async (auth, req) => {
 
     const { userId } = await auth(); // Get user id, null if not authenticated
 
-    if (userId && req.nextUrl.pathname == "/") { // Redirect signed in users to feed page if they try to access home page
+    if (userId && req.url == "/") { // Redirect signed in users to feed page if they try to access home page
         return NextResponse.redirect(new URL("/feed", req.nextUrl));
     }
     

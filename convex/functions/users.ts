@@ -1,9 +1,9 @@
-import { internalMutation, query, QueryCtx } from "../_generated/server";
 import { UserJSON } from "@clerk/backend";
 import { v, Validator } from "convex/values";
+import { internalMutation, query, QueryCtx } from "../_generated/server";
+import { createInterest, deleteInterest } from "./interest";
 
 export const current = query({
-  args: {},
   handler: async (ctx) => {
     return await getCurrentUser(ctx);
   },
@@ -12,8 +12,6 @@ export const current = query({
 export const upsertFromClerk = internalMutation({
     args: { data: v.any() as Validator<UserJSON> }, // no runtime validation, trust Clerk
     async handler(ctx, { data }) {
-
-        console.log(data);
         
         const userAttributes = {
             username: data.username ?? "",
@@ -24,7 +22,19 @@ export const upsertFromClerk = internalMutation({
         const user = await userByClerkId(ctx, data.id);
         
         if (user === null) {
-            await ctx.db.insert("users", userAttributes);
+            
+            const userId = await ctx.db.insert("users", userAttributes);
+
+            const interest = {
+                diy: 0.2,
+                comedy: 0.2,
+                fitness: 0.2,
+                travel: 0.2,
+                sports: 0.2
+            }
+
+            await createInterest(ctx, { userId, interestPeriod: "long", interest });
+
         } else {
             await ctx.db.patch(user._id, userAttributes);
         }
@@ -39,7 +49,12 @@ export const deleteFromClerk = internalMutation({
         const user = await userByClerkId(ctx, clerkUserId);
 
         if (user !== null) {
+            
             await ctx.db.delete(user._id);
+            
+            await deleteInterest(ctx, { userId: user._id, interestPeriod: "long" });
+            await deleteInterest(ctx, { userId: user._id, interestPeriod: "short" });
+
         } else {
             console.warn(
                 `Can't delete user, there is none for Clerk user ID: ${clerkUserId}`,

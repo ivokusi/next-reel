@@ -1,9 +1,5 @@
 import { handleUpload, type HandleUploadBody } from '@vercel/blob/client';
 import { NextResponse } from 'next/server';
-import { ConvexHttpClient } from 'convex/browser';
-import { api } from '@convex/_generated/api';
-
-const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL || '');
 
 export async function POST(request: Request): Promise<NextResponse> {
   
@@ -14,38 +10,36 @@ export async function POST(request: Request): Promise<NextResponse> {
     const jsonResponse = await handleUpload({
       body,
       request,
-      // Part 1: Before Upload - Validation & Authorization
-      onBeforeGenerateToken: async (pathname, clientPayload) => {
+      onBeforeGenerateToken: async (
+        pathname,
+        /* clientPayload */
+      ) => {
+        // Generate a client token for the browser to upload the file
+        // ⚠️ Authenticate and authorize users before generating the token.
+        // Otherwise, you're allowing anonymous uploads.
+ 
         return {
-          allowedContentTypes: ['video/mp4'],
-          tokenPayload: JSON.stringify(clientPayload),
+          allowedContentTypes: ['video/*'],
+          tokenPayload: JSON.stringify({
+            // optional, sent to your server on upload completion
+            // you could pass a user id from auth, or a value from clientPayload
+          }),
         };
       },
-
-      // Part 2: After Upload - Handle Success
       onUploadCompleted: async ({ blob, tokenPayload }) => {
-
+        // Get notified of client upload completion
+        // ⚠️ This will not work on `localhost` websites,
+        // Use ngrok or similar to get the full upload flow
+ 
+        console.log('blob upload completed', blob, tokenPayload);
+ 
         try {
-
-			console.log(tokenPayload);
-			console.log(blob);
-
-			if (!tokenPayload) throw new Error('No token payload');
-			
-			const payload = JSON.parse(tokenPayload);
-			
-			await convex.mutation(api.functions.videos.createVideo, {
-				clerkId: payload.clerkId,
-				hashtags: payload.hashtags,
-				caption: payload.caption,
-				videoUrl: blob.url
-			});
-          
+          // Run any logic after the file upload completed
+          // const { userId } = JSON.parse(tokenPayload);
+          // await db.update({ avatar: blob.url, userId });
         } catch (error) {
-          console.error('Error during upload processing:', error);
-          throw new Error('Failed to process upload');
+          throw new Error('Could not update user');
         }
-
       },
     });
 

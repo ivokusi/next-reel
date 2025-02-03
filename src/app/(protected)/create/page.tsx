@@ -4,28 +4,32 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { useUser } from '@clerk/nextjs';
 import { api } from '@convex/_generated/api';
 import { upload } from '@vercel/blob/client';
-import { ConvexHttpClient } from 'convex/browser';
+import { useMutation } from 'convex/react';
 import { Forward, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useRef, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
-const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL || '');
-
 export default function CreatePage() {
   
     const inputFileRef = useRef<HTMLInputElement>(null);
     const videoRef = useRef<HTMLVideoElement>(null);
+    
     const [preview, setPreview] = useState<string | null>(null);
     const [hashtags, setHashtags] = useState<string[]>([]);
     const [caption, setCaption] = useState<string>('');
+    const [progress, setProgress] = useState<number>(0);
+
     const { user } = useUser();
     const router = useRouter();
+
+    const createVideo = useMutation(api.functions.videos.createVideo);
 
     function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
         
@@ -88,20 +92,48 @@ export default function CreatePage() {
 
         const file = inputFileRef.current.files[0];
 
+        const formData = new FormData();
+        formData.append("file", file);
+
+        const responseTranscribe = await fetch("/api/transcribe", {
+            method: "POST",
+            body: formData
+        })
+
+        const { transcript } = await responseTranscribe.json();
+
+        const responseCategorize = await fetch("/api/categorize", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                transcript,
+                caption,
+                hashtags
+            })
+        })
+
+        const { categories } = await responseCategorize.json();
+
         const newBlob = await upload(uuidv4(), file, {
             access: 'public',
             handleUploadUrl: '/api/create',
+            contentType: file.type,
             clientPayload: JSON.stringify({
                 clerkId: user?.id as string,
                 caption,
                 hashtags
-            })
+            }),
+            onUploadProgress(e) {
+                setProgress(e.percentage);
+            }
         });
 
-        await convex.mutation(api.functions.videos.createVideo, {
-            clerkId: user?.id as string,
+        await createVideo({
             caption,
             hashtags,
+            categories: JSON.parse(categories),
             videoUrl: newBlob.url
         });
 
@@ -145,12 +177,15 @@ export default function CreatePage() {
                     placeholder="Enter a caption for your video"
                     onChange={(e) => setCaption(e.target.value)}
                 />
-                <Button variant="cyan_outline" type="submit" className="w-fit" onClick={handleSubmit}>
-                    <div className="flex items-center gap-2">
-                        <Forward className="size-4" />
-                        Upload
-                    </div>
-                </Button>
+                <div className="flex items-center gap-4">
+                    <Button variant="cyan_outline" type="submit" className="w-fit" onClick={handleSubmit}>
+                        <div className="flex items-center gap-2">
+                            <Forward className="size-4" />
+                            Upload
+                        </div>
+                    </Button>
+                    {progress !== 0 && <Progress value={progress} className="h-[25px]" />}
+                </div>
             </div>
             <Separator orientation="vertical" className="h-[90%]" />
             <div className="h-full flex flex-col gap-8">
